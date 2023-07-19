@@ -237,8 +237,133 @@ body{
 }
 
 
+@keyframes contentLoadAnimation {
+    0%{
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .separator,
+   .category-name,
+  .category-description,
+  .project-poster,
+  .project-name,
+  .project-data,
+  .character-image,
+  .character-alias,
+  .character-name,
+  .character-universe {
+    animation: contentLoadAnimation 1s ease-in-out;
+  }
 
 
+
+.category-titles-preloader{
+    padding: 30px;
+
+    width: 100%; 
+    height: auto;
+    box-sizing: border-box;
+    overflow-x: hidden; 
+    overflow-y: hidden; 
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+    display: flex; 
+    gap: 30px;
+    flex-wrap: nowrap; 
+}
+
+.category-name-preloader{
+    background-color: #ddd;
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-left: 30px;
+    margin-right: 30px;
+    width: 174px;
+    height: 34px;
+    border-radius: 5px;
+}
+
+.category-description-preloader{
+    margin-top: 10px;
+    font-size: 0.9em;
+    margin-left: 30px;
+    margin-right: 30px;
+    background-color: #ddd;
+    color: #ddd;
+    width: 80%;
+    height: 20px;
+    border-radius: 5px;
+}
+
+.project-preloader{
+    box-sizing: border-box;
+    flex-grow: 0;
+    cursor: pointer;
+    text-align: center;
+    transition: all .4s ease-out;
+    width: 164px;
+}
+
+.project-poster-preloader{
+    box-sizing: border-box;
+    object-fit: cover;
+    aspect-ratio: 1687 / 2500;
+    width: 164px;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+    background-color: #ddd;
+    color: #ddd;
+}
+
+.project-name-preloader{
+    width: 119px;
+    height: 18px;
+    margin: auto;
+    text-align: center;
+    box-sizing: border-box;
+    font-weight: bold;
+    font-size: 1em;
+    margin-top: 18px;
+    margin-bottom: 7px;
+    background-color: #ddd;
+    color: #ddd;
+    border-radius: 5px;
+}
+
+.project-data-preloader{
+    width: 105px;
+    height: 14px;
+    margin: auto;
+    margin-top: 4px;
+    text-align: center;
+    font-size: 0.8em;
+    background-color: #ddd;
+    color: #ddd;
+    border-radius: 5px;
+}
+
+@keyframes preloadAnimation {
+    0%, 100% {
+        opacity: 0.59;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+  .category-name-preloader,
+  .category-description-preloader,
+  .project-poster-preloader,
+  .project-name-preloader,
+  .project-data-preloader {
+    animation: preloadAnimation 1.5s ease-in-out infinite;
+  }
 
 
 
@@ -608,11 +733,11 @@ input[type="checkbox"]:disabled {
 }
 
 .edit_button{
-    padding: 10px 40px;
+    padding: 10px 50px;
     box-shadow: 30px;
     font-weight: bold;
     font-size: 0.9em;
-    background-color: #ddd;
+    background-color: #eee;
     text-align: center;
     width: fit-content;
     margin: 0 auto;
@@ -625,6 +750,6 @@ input[type="checkbox"]:disabled {
 
 
 .footer{
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #eee;
     height: 400px;
 }

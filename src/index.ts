@@ -292,7 +292,13 @@ async function load() {
 load().then(() => {
   // Hide the preloader when the loading is done
   const preloader = document.querySelector('.preloader') as HTMLElement | null;
+  const sections = document.getElementById("sectionsContainer") as HTMLElement | null;
   if (preloader) {
     preloader.style.display = 'none';
   }
+
+  if (sections) {
+    sections.style.visibility = 'visible';
+  }
+
 });

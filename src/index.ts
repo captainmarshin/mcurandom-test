@@ -11,6 +11,7 @@ const wasmUrl = new URL("sql.js-httpvfs/dist/sql-wasm.wasm",
 
 // Load database
 async function load() {
+  
     const worker = await createDbWorker(
         [{
             from: "inline",
@@ -199,7 +200,7 @@ async function load() {
               const imageElement = document.createElement('div');
               imageElement.classList.add('character-image');
               const characterImg = document.createElement('img');
-              characterImg.src = content.image;
+              characterImg.src = "." + content.image;
               imageElement.appendChild(characterImg);
       
               // Create the title element
@@ -235,7 +236,7 @@ async function load() {
             const posterElement = document.createElement('div');
             posterElement.classList.add('project-poster');
             const posterImg = document.createElement('img');
-            posterImg.src = content.poster;
+            posterImg.src = "." + content.poster;
             posterElement.appendChild(posterImg);
     
             // Create the title element
@@ -272,6 +273,7 @@ async function load() {
     
             categoryTitlesElement.appendChild(contentElement);
           }
+
           });
         }
       });
@@ -282,7 +284,15 @@ async function load() {
     
     // Call the function to fetch and display the categories
     fetchCategories();
+
+    return Promise.resolve();
     
 }
 
-load();
+load().then(() => {
+  // Hide the preloader when the loading is done
+  const preloader = document.querySelector('.preloader') as HTMLElement | null;
+  if (preloader) {
+    preloader.style.display = 'none';
+  }
+});

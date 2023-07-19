@@ -148,6 +148,7 @@ body{
 .project-poster{
     text-align: center;
     box-sizing: border-box;
+    background-color: #ddd;
 }
 
 .project-poster img{
@@ -198,6 +199,7 @@ body{
 .character-image{
     text-align: center;
     box-sizing: border-box;
+    background-color: #ddd;
 }
 
 .character-image img{
@@ -239,7 +241,7 @@ body{
 
 @keyframes contentLoadAnimation {
     0%{
-        opacity: 0;
+        opacity: 0.7;
       }
       100% {
         opacity: 1;

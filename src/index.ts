@@ -164,7 +164,7 @@ async function load() {
       });
     
       // Call the function to fetch and display the content for each category
-      queryCategories.forEach((category: any) => {
+      queryCategories.forEach(async (category: any) => {
         // Modify category name to proper format for get all queries
         // For ex.: Fox's X-Men Universe will be fox_xmen_universe
         const queryName = category.name
@@ -177,7 +177,7 @@ async function load() {
         const query = `query_${queryName}`;
 
         // Call the function to fetch and display content in category
-        fetchContentForCategory(eval(query), category.name);
+        await fetchContentForCategory(eval(query), category.name);
       });
     }
 
@@ -280,25 +280,42 @@ async function load() {
     }
 
     // Call the function to fetch and display the sections
-    fetchSections();
+    await fetchSections();
     
     // Call the function to fetch and display the categories
-    fetchCategories();
+    await fetchCategories();
 
     return Promise.resolve();
     
 }
 
+// load().then(() => {
+//   // Get the preloader element
+//   const preloader = document.querySelector('.preloader') as HTMLElement | null;
+//   // Get the sectionsContainer element
+//   const sectionsContainer = document.getElementById('sectionsContainer') as HTMLElement | null;
+
+//   // Hide the preloader after 3 seconds
+//   setTimeout(() => {
+//     if (preloader) {
+//       preloader.style.display = 'none';
+//     }
+
+//     // Show the sectionsContainer
+//     if (sectionsContainer) {
+//       sectionsContainer.style.visibility = 'visible';
+//     }
+//   }, 3000);
+// });
+
 load().then(() => {
-  // Hide the preloader when the loading is done
+  // Get the preloader element
   const preloader = document.querySelector('.preloader') as HTMLElement | null;
-  const sections = document.getElementById("sectionsContainer") as HTMLElement | null;
-  if (preloader) {
-    preloader.style.display = 'none';
-  }
 
-  if (sections) {
-    sections.style.visibility = 'visible';
-  }
-
+  // Hide the preloader after 3 seconds
+    if (preloader) {
+      preloader.style.display = 'none';
+    }
 });
+
+

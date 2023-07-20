@@ -6,10 +6,19 @@ body{
 
 ::-webkit-scrollbar { display: none; }
 
-#sectionsContainer{
-    min-height: 400px;
+/* #sectionsContainer{
     visibility: hidden;
-}
+    animation: sectionsLoadAnimation 1s ease-in-out;
+} */
+
+/* @keyframes sectionsLoadAnimation {
+    0%{
+        opacity: 0.7;
+      }
+      100% {
+        opacity: 1;
+      }
+    } */
 
 .category-name{
     font-size: 1.8em;
@@ -178,6 +187,14 @@ body{
     animation: contentLoadAnimation 1s ease-in-out;
   }
 
+
+.preloader{
+    /* width: 100%;
+    height: fit-content;
+    margin-top: -24px;
+    position: absolute; */
+    margin-top: 110px;
+}
 
 
 .category-titles-preloader{

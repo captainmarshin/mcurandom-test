@@ -62,30 +62,31 @@ body{
     flex-grow: 0;
     cursor: pointer;
     text-align: center;
-    transition: all .4s ease-out;
+    transition: all .1s ease-out;
     width: 164px;
 }
 
 .project:hover{
     transform: scale(1.01);
-    transition: all .4s ease-in;
+    transition: all .1s ease-in;
 }
 
 .project-poster{
     text-align: center;
     box-sizing: border-box;
     background-color: #ddd;
+    border-radius: 10px;
+    box-shadow: 0 7px 17px -8px rgba(0,0,0,.8);
 }
 
 .project-poster img{
     box-sizing: border-box;
     object-fit: cover;
     aspect-ratio: 1687 / 2500;
-    width: 164px;
+    width: 163px;
     display: block;
     height: auto;
     border-radius: 10px;
-    box-shadow: 0 7px 17px -8px rgba(0,0,0,.8);
 }
 
 .project-name{
@@ -113,13 +114,13 @@ body{
     flex-grow: 0;
     cursor: pointer;
     text-align: center;
-    transition: all .4s ease-out;
+    transition: all .1s ease-out;
     width: 164px;
 }
 
 .character:hover{
     transform: scale(1.01);
-    transition: all .4s ease-in;
+    transition: all .1s ease-in;
 }
 
 .character-image{
@@ -185,7 +186,7 @@ body{
   .character-alias,
   .character-name,
   .character-universe {
-    animation: contentLoadAnimation 1s ease-in-out;
+    animation: contentLoadAnimation .5s ease-in-out;
   }
 
 

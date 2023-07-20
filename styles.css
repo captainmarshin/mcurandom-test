@@ -126,6 +126,7 @@ body{
     text-align: center;
     box-sizing: border-box;
     background-color: #ddd;
+    border-radius: 50%;
 }
 
 .character-image img{

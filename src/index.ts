@@ -118,7 +118,7 @@ async function load() {
       const sectionContainers = document.getElementsByClassName("section");
     
       // Loop through each category
-      queryCategories.forEach((category: any) => {
+      queryCategories.forEach(async (category: any) => {
         // Find the corresponding section container
         const sectionContainer = Array.from(sectionContainers).find((container: any) => {
           const sectionName = container.getAttribute("name");
@@ -155,11 +155,12 @@ async function load() {
           // Create the titles element
           const categoryTitlesElement = document.createElement("div");
           categoryTitlesElement.classList.add("category-titles");
-          categoryTitlesElement.setAttribute("name", category.name);
+          categoryTitlesElement.setAttribute("name", category.name); 
           categoryBlock.appendChild(categoryTitlesElement);
     
           // Append the category block to the section container
           sectionContainer.appendChild(categoryBlock);
+
         }
       });
     
@@ -194,6 +195,7 @@ async function load() {
             if (categoryName === 'Characters') {
               // Create the content element
               const characterElement = document.createElement('div');
+              characterElement.setAttribute("name", content.alias);
               characterElement.classList.add('character');
       
               // Create the poster element
@@ -230,6 +232,7 @@ async function load() {
 
             // Create the content element
             const contentElement = document.createElement('div');
+            contentElement.setAttribute("name", content.title);
             contentElement.classList.add('project');
     
             // Create the poster element
@@ -279,11 +282,64 @@ async function load() {
       });
     }
 
+
+    // Define a type for the widget colors
+    type WidgetColors = {
+      [key in 'Next' | 'Random' | 'Trivia' | 'Quiz' | 'Rewatch' | 'Music']: string;
+    };
+
+    // Fetch widgets from the `web_widgets` table
+    async function fetchWidgets() {
+      const queryWidgets = await worker.db.query(`SELECT name, sorting FROM web_widgets`);
+
+      // Map widget names to background color IDs
+      const widgetColors: WidgetColors = {
+        Next: 'widget-next',
+        Random: 'widget-random',
+        Trivia: 'widget-trivia',
+        Quiz: 'widget-quiz',
+        Rewatch: 'widget-rewatch',
+        Music: 'widget-music'
+      };
+
+      // Loop through each widget and attach it to its corresponding section
+      queryWidgets.forEach((widget: any) => {
+        // Get the section to which the widget belongs
+        const section = document.querySelector(`[name="${widget.sorting}"]`);
+        if (section) {
+          // Create the widget element
+          const widgetElement = document.createElement('div');
+          widgetElement.classList.add('widget');
+          const backgroundColorId = widgetColors[widget.name as keyof WidgetColors]; // Type assertion here
+          if (backgroundColorId) {
+            widgetElement.id = backgroundColorId;
+            widgetElement.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(`--${backgroundColorId}`);
+          }
+
+          // Create the widget content element
+          const widgetContentElement = document.createElement('div');
+          widgetContentElement.classList.add('widget-content');
+          widgetContentElement.textContent = widget.name;
+          widgetElement.appendChild(widgetContentElement);
+
+          // Append the widget to the section
+          section.appendChild(widgetElement);
+        }
+      });
+    }
+
+
+
+
+
+
     // Call the function to fetch and display the sections
     await fetchSections();
     
     // Call the function to fetch and display the categories
     await fetchCategories();
+
+    await fetchWidgets();
 
     return Promise.resolve();
     

@@ -887,7 +887,6 @@ input[type="checkbox"]:disabled {
     margin: 0 auto;
     margin-top: 10px;
     display: none;
-    border: 1px solid red;
 }
 
 .project-page-close-button-x{
@@ -1206,7 +1205,7 @@ input[type="checkbox"]:disabled {
 
     /* Project page mobile window */
 
-    /* .project-page-background{
+    .project-page-background{
         width: 100%;
         position: fixed;
         top: 0;
@@ -1216,8 +1215,11 @@ input[type="checkbox"]:disabled {
     
     .project-page{
         width: 100%;
-        height: auto;
-        top: 74px;
+        height: 100%;
+        position: fixed;
+        top: 70%;
+        left: 50%;
+        transform: translate(-50%, -60%);
         z-index: 2;
         border: 0;
         border-radius: 20px 20px 0 0;
@@ -1229,5 +1231,5 @@ input[type="checkbox"]:disabled {
 
     .project-page-close-button-x{
         display: none;
-    } */
+    }
 }

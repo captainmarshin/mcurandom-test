@@ -500,7 +500,8 @@ load().then(() => {
 
 
     // Window: Get data
-    function getProjectData(target: HTMLElement) {
+    async function getProjectData(target: HTMLElement) {
+
         const projectDiv = target.closest('.project') as HTMLElement;
         if (!projectDiv) {
             return null;
@@ -512,6 +513,34 @@ load().then(() => {
         if (!name || !type) {
             return null;
         }
+
+        const tableNames = ['titles_animation', 'titles_books', 'titles_comics', 'titles_documentary', 
+        'titles_games', 'titles_movies', 'titles_movies_legacy', 'titles_musicals', 'titles_oneshots', 
+        'titles_specials', 'titles_tv', 'titles_webseries'];
+        const results = [];
+
+        const episodesTables = ['episodes_animation', 'episodes_tv', 'episodes_webseries']
+        const episodesResults = []
+
+        for (const tableName of tableNames) {
+            const query = `SELECT * FROM ${tableName} WHERE title = ? AND type = ?`;
+            const queryResult = await worker.db.query(query, [name, type]);
+
+            if (queryResult.length > 0) {
+                results.push({ tableName, rows: queryResult });
+            }
+        }
+
+        for (const episodesTable of episodesTables) {
+          const query = `SELECT * FROM ${episodesTable} WHERE tv_title = ?`;
+          const queryResult = await worker.db.query(query, [name]);
+
+          if (queryResult.length > 0) {
+            episodesResults.push({ episodesTable, rows: queryResult });
+          }
+      }
+
+
 
         const screenshotName = name
             .toLowerCase()
@@ -525,7 +554,8 @@ load().then(() => {
         const screenshotUrl = `./img/screenshots/${screenshotName}.jpg`
         const posterUrl = projectDiv.querySelector('.project-poster img') ?.getAttribute('src');
         const description = projectDiv.querySelector('.project-description') ?.textContent;
-        const universe_data = `Universe data`
+        const universe_data = results
+        const episodes_data = episodesResults
 
         return {
             name,
@@ -533,7 +563,8 @@ load().then(() => {
             posterUrl,
             description,
             screenshotUrl,
-            universe_data
+            universe_data,
+            episodes_data
         };
     }
 
@@ -545,12 +576,7 @@ load().then(() => {
         <div class="project-page-close-button-x"><span class="material-symbols-outlined">close</span></div>
       </div>
 
-      <div class="project-page-header-little">
-        <div class="project-page-header-little-title">${projectData.name}</div>
-        <div class="project-page-header-little-type">${projectData.type}</div>
-      </div>
-
-      <div class="project-page-cover" style="background-image: url('${projectData.screenshotUrl}');"></div>
+      <div class="project-page-cover" style="background-image: url('${projectData.posterUrl}');"></div>
 
       <div class="project-page-content">
         <div class="project-page-card-block">
@@ -568,14 +594,28 @@ load().then(() => {
 
       <div class="project-page-universe">
         <div class="project-page-section-content">
-            ${projectData.universe_data}
+        ${projectData.universe_data.map((item: { tableName: any; rows: any[]; }) => `
+        <div class="universe-data-item">
+            <div class="table-name">${item.tableName}</div>
+            <div class="table-rows">${item.rows.map(row => `
+                <div class="table-row">${JSON.stringify(row)}</div>
+            `).join('')}</div>
+        </div>
+    `).join('')}
         </div>
       </div>
 
       <div class="project-page-episodes">
           <div class="project-page-header">Episodes</div>
           <div class="project-page-section-content">
-              
+          ${projectData.episodes_data.map((item: { tableName: any; rows: any[]; }) => `
+          <div class="universe-data-item">
+              <div class="table-name">${item.tableName}</div>
+              <div class="table-rows">${item.rows.map(row => `
+                  <div class="table-row">${JSON.stringify(row)}</div>
+              `).join('')}</div>
+          </div>
+      `).join('')}
           </div>
       </div>
 
@@ -602,10 +642,10 @@ load().then(() => {
     }
 
     // Window: Open
-    function openProjectWindow(event: Event) {
+    async function openProjectWindow(event: Event) {
         const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
         const existingProjectPage = projectBackground.querySelector('.project-page') as HTMLElement;
-        const projectData = getProjectData(event.target as HTMLElement);
+        const projectData = await getProjectData(event.target as HTMLElement);
 
         if (!projectData) {
             return;
@@ -618,6 +658,9 @@ load().then(() => {
             const projectPageWindow = createProjectPageWindow(projectData);
             projectPage.innerHTML = projectPageWindow;
             projectBackground.appendChild(projectPage);
+
+            projectPage.classList.add('project-page-animation');
+
             const closeButton = projectPage.querySelector('.project-page-close-button') as HTMLElement;
             if (closeButton) {
                 closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
@@ -627,6 +670,10 @@ load().then(() => {
             existingProjectPage.setAttribute('name', projectData.name);
             existingProjectPage.innerHTML = '';
             existingProjectPage.innerHTML = projectPageWindow;
+
+            existingProjectPage.classList.add('project-page-animation'); // Add animation class
+            projectBackground.appendChild(existingProjectPage);
+
             const closeButton = existingProjectPage.querySelector('.project-page-close-button') as HTMLElement;
             if (closeButton) {
                 closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
@@ -650,6 +697,11 @@ load().then(() => {
             target.classList.contains('project-page-close-button') ||
             target.classList.contains('material-symbols-outlined')
         ) {
+          const projectPage = document.querySelector('.project-page-animation') as HTMLElement;
+          if (projectPage) {
+              projectPage.classList.remove('project-page-animation');
+          }
+
             closeProjectWindow(document.querySelector('.project-page-background') as HTMLElement);
         }
     });

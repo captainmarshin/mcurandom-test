@@ -576,6 +576,13 @@ load().then(() => {
         <div class="project-page-close-button-x"><span class="material-symbols-outlined">close</span></div>
       </div>
 
+      <div class="project-page-header-little">
+        <div class="project-page-header-content">
+            <div class="project-page-header-little-title">${projectData.name}</div>
+            <div class="project-page-header-little-type">${projectData.type}</div>
+        </div>
+        </div>
+
       <div class="project-page-cover" style="background-image: url('${projectData.posterUrl}');"></div>
 
       <div class="project-page-content">

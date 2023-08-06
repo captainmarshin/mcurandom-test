@@ -2,7 +2,7 @@
 
 // ------------------------------------------------------------
 
-import { createDbWorker } from "sql.js-httpvfs";
+import { WorkerHttpvfs, createDbWorker } from "sql.js-httpvfs";
 
 const workerUrl = new URL(
     "sql.js-httpvfs/dist/sqlite.worker.js",
@@ -12,11 +12,13 @@ const workerUrl = new URL(
 const wasmUrl = new URL("sql.js-httpvfs/dist/sql-wasm.wasm",
     import.meta.url);
 
+let worker: WorkerHttpvfs; 
+
 // ------------------------------------------------------------
 
 async function load() {
-  
-    const worker = await createDbWorker(
+
+    worker = await createDbWorker(
         [{
             from: "inline",
             config: {
@@ -82,238 +84,367 @@ async function load() {
 
     const query_runtime = await worker.db.query(`SELECT runtime, type FROM ( SELECT runtime, type FROM titles_movies UNION SELECT runtime, type FROM titles_tv UNION SELECT runtime, type FROM titles_animation UNION SELECT runtime, type FROM titles_oneshots UNION SELECT runtime, type FROM titles_specials UNION SELECT runtime, type FROM titles_webseries UNION SELECT runtime, type FROM titles_movies_legacy) ORDER BY type`)
 
-    // Fetch sections from db and create on page
+
+    // Sections
     async function fetchSections() {
-      const querySections = await worker.db.query(`SELECT name FROM web_sections ORDER BY sorting ASC`);
-      const sectionsContainer = document.getElementById("sectionsContainer");
-    
-      if (sectionsContainer) {
-        querySections.forEach((section: any) => {
-          const sectionElement = document.createElement("div");
-          sectionElement.classList.add("section");
-          sectionElement.setAttribute("name", section.name);
-    
-          if (section.name !== "Current") {
-            const sectionNameElement = document.createElement("div");
-            sectionNameElement.classList.add("separator");
-            sectionNameElement.textContent = section.name;
-            sectionElement.appendChild(sectionNameElement);
-          }
-    
-          sectionsContainer.appendChild(sectionElement);
-        });
-      }
-    }
-    
+        const querySections = await worker.db.query(`SELECT name FROM web_sections ORDER BY sorting ASC`);
+        const sectionsContainer = document.getElementById("sectionsContainer");
 
-    async function fetchCategories() {
-      const queryCategories = await worker.db.query(`SELECT name, section, description FROM web_categories`);
-      const sectionContainers = document.getElementsByClassName("section");
-    
-      queryCategories.forEach(async (category: any) => {
-        const sectionContainer = Array.from(sectionContainers).find((container: any) => {
-          const sectionName = container.getAttribute("name");
-          return sectionName === category.section;
-        });
-    
-        if (sectionContainer) {
-          const categoryBlock = document.createElement("div");
-          categoryBlock.classList.add("category-block");
-    
-          const categoryNameElement = document.createElement("div");
-          categoryNameElement.classList.add("category-name");
-          categoryNameElement.textContent = category.name;
-          categoryBlock.appendChild(categoryNameElement);
-    
-          if (category.name !== "Running now") {
-            const categoryDescriptionElement = document.createElement("div");
-            categoryDescriptionElement.classList.add("category-description");
-            categoryDescriptionElement.textContent = category.description;
-            categoryBlock.appendChild(categoryDescriptionElement);
-          }
+        if (sectionsContainer) {
+            querySections.forEach((section: any) => {
+                const sectionElement = document.createElement("div");
+                sectionElement.classList.add("section");
+                sectionElement.setAttribute("name", section.name);
 
-          if (category.name == "Running now") {
-            const categoryDescriptionElement = document.createElement("div");
-            categoryDescriptionElement.classList.add("category-description");
-            categoryBlock.appendChild(categoryDescriptionElement);
-          }
-    
-          const categoryTitlesElement = document.createElement("div");
-          categoryTitlesElement.classList.add("category-titles");
-          categoryTitlesElement.setAttribute("name", category.name); 
-          categoryBlock.appendChild(categoryTitlesElement);
-
-          sectionContainer.appendChild(categoryBlock);
-
-        }
-      });
-        
-      queryCategories.forEach(async (category: any) => {
-        const queryName = category.name
-          .toLowerCase()
-          .replace(/-/g, '')
-          .replace(/['’]s?/g, '')
-          .replace(/\s/g, '_');
-        const query = `query_${queryName}`;
-
-        await fetchContentForCategory(eval(query), category.name);
-      });
-    }
-
-
-    async function fetchContentForCategory(queryContent: any[], categoryName: string) {
-      const categoryTitlesElements = document.querySelectorAll('.category-titles');
-    
-      categoryTitlesElements.forEach((categoryTitlesElement) => {
-        if (categoryTitlesElement.getAttribute('name') === categoryName) {
-          queryContent.forEach((content: any) => {
-
-            if (categoryName === 'Characters') {
-              const characterElement = document.createElement('div');
-              characterElement.setAttribute("name", content.alias);
-              characterElement.classList.add('character');
-      
-              const imageElement = document.createElement('div');
-              imageElement.classList.add('character-image');
-              const characterImg = document.createElement('img');
-              characterImg.src = "." + content.image;
-              imageElement.appendChild(characterImg);
-      
-              const aliasElement = document.createElement('div');
-              aliasElement.classList.add('character-alias');
-              aliasElement.textContent = content.alias;
-      
-              const nameElement = document.createElement('div');
-              nameElement.classList.add('character-name');
-              nameElement.textContent = content.name;
-      
-              const universeElement = document.createElement('div');
-              universeElement.classList.add('character-universe');
-              universeElement.textContent = content.universe;
-      
-              characterElement.appendChild(imageElement);
-              characterElement.appendChild(aliasElement);
-              characterElement.appendChild(nameElement);
-              characterElement.appendChild(universeElement);
-
-              categoryTitlesElement.appendChild(characterElement);
-              
-            } else {
-
-              const contentElement = document.createElement('div');
-              contentElement.setAttribute("name", content.title);
-              contentElement.setAttribute("data-type", content.type);
-              contentElement.classList.add('project');
-      
-              const posterElement = document.createElement('div');
-              posterElement.classList.add('project-poster');
-              const posterImg = document.createElement('img');
-              posterImg.src = "." + content.poster;
-              posterElement.appendChild(posterImg);
-      
-              const titleElement = document.createElement('div');
-              titleElement.classList.add('project-name');
-              titleElement.textContent = content.title;
-
-              const typeElement = document.createElement('div');
-              typeElement.classList.add('project-type');
-              typeElement.textContent = content.type;
-      
-              const sagaElement = document.createElement('div');
-              sagaElement.classList.add('project-saga');
-              sagaElement.textContent = content.saga;
-      
-              const phaseElement = document.createElement('div');
-              phaseElement.classList.add('project-phase');
-              phaseElement.textContent = content.phase;
-
-              const releasedateElement = document.createElement('div');
-              releasedateElement.classList.add('project-date');
-              releasedateElement.textContent = content.release_date;
-
-              const descriptionElement = document.createElement('div');
-              descriptionElement.classList.add('project-description');
-              descriptionElement.textContent = content.description;
-      
-              contentElement.appendChild(posterElement);
-              contentElement.appendChild(titleElement);
-              contentElement.appendChild(typeElement);
-              contentElement.appendChild(sagaElement);
-              contentElement.appendChild(phaseElement);
-              contentElement.appendChild(releasedateElement);
-              contentElement.appendChild(descriptionElement);
-
-              if (categoryName === 'Running now') {
-                const categoryDescriptionElement = categoryTitlesElement.previousElementSibling;
-                if (categoryDescriptionElement) {
-                  categoryDescriptionElement.textContent = content.description;
+                if (section.name !== "Current") {
+                    const sectionNameElement = document.createElement("div");
+                    sectionNameElement.classList.add("separator");
+                    sectionNameElement.textContent = section.name;
+                    sectionElement.appendChild(sectionNameElement);
                 }
-              }
-      
-              categoryTitlesElement.appendChild(contentElement);
-            }
 
+                sectionsContainer.appendChild(sectionElement);
             });
+        }
+    }
+
+
+    // Categories
+    async function fetchCategories() {
+        const queryCategories = await worker.db.query(`SELECT name, section, description FROM web_categories`);
+        const sectionContainers = document.getElementsByClassName("section");
+
+        queryCategories.forEach(async (category: any) => {
+            const sectionContainer = Array.from(sectionContainers).find((container: any) => {
+                const sectionName = container.getAttribute("name");
+                return sectionName === category.section;
+            });
+
+            if (sectionContainer) {
+                const categoryBlock = document.createElement("div");
+                categoryBlock.classList.add("category-block");
+
+                const categoryNameElement = document.createElement("div");
+                categoryNameElement.classList.add("category-name");
+                categoryNameElement.textContent = category.name;
+                categoryBlock.appendChild(categoryNameElement);
+
+                if (category.name !== "Running now") {
+                    const categoryDescriptionElement = document.createElement("div");
+                    categoryDescriptionElement.classList.add("category-description");
+                    categoryDescriptionElement.textContent = category.description;
+                    categoryBlock.appendChild(categoryDescriptionElement);
+                }
+
+                if (category.name == "Running now") {
+                    const categoryDescriptionElement = document.createElement("div");
+                    categoryDescriptionElement.classList.add("category-description");
+                    categoryBlock.appendChild(categoryDescriptionElement);
+                }
+
+                const categoryTitlesElement = document.createElement("div");
+                categoryTitlesElement.classList.add("category-titles");
+                categoryTitlesElement.setAttribute("name", category.name);
+                categoryBlock.appendChild(categoryTitlesElement);
+
+                sectionContainer.appendChild(categoryBlock);
+
+            }
+        });
+
+        queryCategories.forEach(async (category: any) => {
+            const queryName = category.name
+                .toLowerCase()
+                .replace(/-/g, '')
+                .replace(/['’]s?/g, '')
+                .replace(/\s/g, '_');
+            const query = `query_${queryName}`;
+
+            await fetchContentForCategory(eval(query), category.name);
+        });
+    }
+
+    // Projects & Characters
+    async function fetchContentForCategory(queryContent: any[], categoryName: string) {
+        const categoryTitlesElements = document.querySelectorAll('.category-titles');
+
+        categoryTitlesElements.forEach((categoryTitlesElement) => {
+            if (categoryTitlesElement.getAttribute('name') === categoryName) {
+                queryContent.forEach((content: any) => {
+
+                    if (categoryName === 'Characters') {
+                        const characterElement = document.createElement('div');
+                        characterElement.setAttribute("name", content.alias);
+                        characterElement.classList.add('character');
+
+                        const imageElement = document.createElement('div');
+                        imageElement.classList.add('character-image');
+                        const characterImg = document.createElement('img');
+                        characterImg.src = "." + content.image;
+                        imageElement.appendChild(characterImg);
+
+                        const aliasElement = document.createElement('div');
+                        aliasElement.classList.add('character-alias');
+                        aliasElement.textContent = content.alias;
+
+                        const nameElement = document.createElement('div');
+                        nameElement.classList.add('character-name');
+                        nameElement.textContent = content.name;
+
+                        const universeElement = document.createElement('div');
+                        universeElement.classList.add('character-universe');
+                        universeElement.textContent = content.universe;
+
+                        characterElement.appendChild(imageElement);
+                        characterElement.appendChild(aliasElement);
+                        characterElement.appendChild(nameElement);
+                        characterElement.appendChild(universeElement);
+
+                        categoryTitlesElement.appendChild(characterElement);
+
+                    } else {
+
+                        const contentElement = document.createElement('div');
+                        contentElement.setAttribute("name", content.title);
+                        contentElement.setAttribute("data-type", content.type);
+                        contentElement.classList.add('project');
+
+                        const posterElement = document.createElement('div');
+                        posterElement.classList.add('project-poster');
+                        const posterImg = document.createElement('img');
+                        posterImg.src = "." + content.poster;
+                        posterElement.appendChild(posterImg);
+
+                        const titleElement = document.createElement('div');
+                        titleElement.classList.add('project-name');
+                        titleElement.textContent = content.title;
+
+                        const typeElement = document.createElement('div');
+                        typeElement.classList.add('project-type');
+                        typeElement.textContent = content.type;
+
+                        const sagaElement = document.createElement('div');
+                        sagaElement.classList.add('project-saga');
+                        sagaElement.textContent = content.saga;
+
+                        const phaseElement = document.createElement('div');
+                        phaseElement.classList.add('project-phase');
+                        phaseElement.textContent = content.phase;
+
+                        const releasedateElement = document.createElement('div');
+                        releasedateElement.classList.add('project-date');
+                        releasedateElement.textContent = content.release_date;
+
+                        const descriptionElement = document.createElement('div');
+                        descriptionElement.classList.add('project-description');
+                        descriptionElement.textContent = content.description;
+
+                        contentElement.appendChild(posterElement);
+                        contentElement.appendChild(titleElement);
+                        contentElement.appendChild(typeElement);
+                        contentElement.appendChild(sagaElement);
+                        contentElement.appendChild(phaseElement);
+                        contentElement.appendChild(releasedateElement);
+                        contentElement.appendChild(descriptionElement);
+
+                        if (categoryName === 'Running now') {
+                            const categoryDescriptionElement = categoryTitlesElement.previousElementSibling;
+                            if (categoryDescriptionElement) {
+                                categoryDescriptionElement.textContent = content.description;
+                            }
+                        }
+
+                        categoryTitlesElement.appendChild(contentElement);
+                    }
+
+                });
+            }
+        });
+    }
+
+
+    // Widgets
+    type WidgetColors = {
+      [key in 'Next' | 'Random' | 'Trivia' | 'Quiz' | 'Rewatch' | 'Music']: string;
+  };
+
+  async function fetchWidgets() {
+      const queryWidgets = await worker.db.query(`SELECT name, sorting FROM web_widgets`);
+
+      const widgetColors: WidgetColors = {
+          Next: 'widget-next',
+          Random: 'widget-random',
+          Trivia: 'widget-trivia',
+          Quiz: 'widget-quiz',
+          Rewatch: 'widget-rewatch',
+          Music: 'widget-music'
+      };
+
+      queryWidgets.forEach(async (widget: any) => {
+          const section = document.querySelector(`[name="${widget.sorting}"]`);
+
+          if (section) {
+              const widgetElement = document.createElement('div');
+              widgetElement.classList.add('widget');
+              const backgroundColorId = widgetColors[widget.name as keyof WidgetColors]; // Type assertion here
+
+              if (backgroundColorId) {
+                  widgetElement.id = backgroundColorId;
+                  widgetElement.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(`--${backgroundColorId}`);
+              }
+
+              // Widget Header
+              const widgetHeaderElement = document.createElement('div');
+              widgetHeaderElement.classList.add('widget-header');
+
+              // Widget Name
+              const widgetNameElement = document.createElement('div');
+              widgetNameElement.classList.add('widget-name');
+              widgetNameElement.textContent = widget.name;
+              widgetHeaderElement.appendChild(widgetNameElement);
+
+              // Widget Menu
+              const widgetMenuElement = document.createElement('div');
+              widgetMenuElement.classList.add('widget-menu');
+              widgetMenuElement.setAttribute('id', `${widget.name}-btn`);
+              widgetMenuElement.innerHTML = '<span class="material-symbols-outlined">help</span>';
+              widgetHeaderElement.appendChild(widgetMenuElement);
+
+              widgetElement.appendChild(widgetHeaderElement);
+
+              // Widget Content
+              const widgetContentElement = document.createElement('div');
+              widgetContentElement.classList.add('widget-content');
+
+              // Widget Content Header
+              const widgetTextHeaderElement = document.createElement('div');
+              widgetTextHeaderElement.classList.add('widget-text-h');
+              widgetContentElement.appendChild(widgetTextHeaderElement);
+
+              // Widget Content Content
+              const widgetTextContentElement = document.createElement('div');
+              widgetTextContentElement.classList.add('widget-text-c');
+              widgetContentElement.appendChild(widgetTextContentElement);
+
+              // Widget Content Description
+              const widgetTextDescriptionElement = document.createElement('div');
+              widgetTextDescriptionElement.classList.add('widget-text-d');
+              widgetContentElement.appendChild(widgetTextDescriptionElement);
+
+              widgetElement.appendChild(widgetContentElement);
+
+              // --------
+
+
+              if (widget.name === 'Next') {
+                  const daysUntilNextRelease = await calculateDaysUntilNextRelease(query_upcoming);
+
+                  widgetTextHeaderElement.textContent = `The Marvels`;
+                  widgetTextContentElement.textContent = `${daysUntilNextRelease} days`;
+                  widgetTextDescriptionElement.textContent = `until new release`;
+
+                  const result = await generateICSFile();
+
+                  if (result !== null) {
+                      const { blobUrl, title } = result;
+                      const widgetButtonElement = document.createElement('div');
+                      widgetButtonElement.classList.add('widget-button');
+                      widgetButtonElement.setAttribute('id', 'notify-btn');
+                      widgetButtonElement.setAttribute('data-url', blobUrl); // ics blob url
+                      widgetButtonElement.setAttribute('data-title', title); // project title
+                      widgetButtonElement.textContent = 'Notify me';
+                      widgetElement.appendChild(widgetButtonElement);
+                  }
+              }
+
+              if (widget.name === 'Random') {
+                  widgetTextContentElement.textContent = `Get random title from entire multiverse!`;
+                  const widgetButtonElement = document.createElement('div');
+                  widgetButtonElement.classList.add('widget-button');
+                  widgetButtonElement.setAttribute('id', 'random-btn');
+                  widgetButtonElement.textContent = 'Random!';
+                  widgetElement.appendChild(widgetButtonElement);
+              }
+
+              if (widget.name === 'Trivia') {
+
+                  widgetTextHeaderElement.textContent = `Did you know?`;
+                  widgetTextContentElement.textContent = ``;
+                  widgetTextDescriptionElement.textContent = ``;
+
+                  const widgetButtonElement = document.createElement('div');
+                  widgetButtonElement.classList.add('widget-button');
+                  widgetButtonElement.setAttribute('id', 'trivia-btn');
+                  widgetButtonElement.textContent = 'Another one!';
+                  widgetElement.appendChild(widgetButtonElement);
+              }
+
+              if (widget.name === 'Quiz') {
+                  widgetTextContentElement.textContent = `Quiz`;
+              }
+
+              if (widget.name === 'Rewatch') {
+                  const totalRewatchTime = await calculateTotalRewatchTime(query_runtime);
+                  let rewatchTime = '';
+
+                  if (totalRewatchTime.days > 0) { rewatchTime += `${totalRewatchTime.days} days `; }
+                  if (totalRewatchTime.hours > 0) { rewatchTime += `${totalRewatchTime.hours} hours `; }
+                  rewatchTime += `${totalRewatchTime.minutes} minutes`;
+
+                  widgetTextHeaderElement.textContent = `You need`;
+                  widgetTextContentElement.textContent = `${rewatchTime}`;
+                  widgetTextDescriptionElement.textContent = `to rewatch all content`;
+
+                  const widgetButtonElement = document.createElement('div');
+                  widgetButtonElement.classList.add('widget-button');
+                  widgetButtonElement.setAttribute('id', 'rewatch-checklist-btn');
+                  widgetButtonElement.textContent = 'Rewatch Checklist';
+                  widgetElement.appendChild(widgetButtonElement);
+              }
+
+              if (widget.name === 'Music') {
+                  const widgetButtonElement = document.createElement('div');
+                  widgetButtonElement.classList.add('widget-button');
+                  widgetButtonElement.setAttribute('id', 'music-btn');
+                  widgetButtonElement.textContent = 'Listen';
+                  widgetElement.appendChild(widgetButtonElement);
+              }
+
+              section.appendChild(widgetElement);
           }
       });
+  }
+
+
+    // Widget: Next onload info
+    async function calculateDaysUntilNextRelease(query_upcoming: any) {
+        if (query_upcoming && query_upcoming.length > 0) {
+            const nextReleaseDate = new Date(query_upcoming[0].release_date);
+            const today = new Date();
+            const timeDiff = nextReleaseDate.getTime() - today.getTime();
+            const daysUntilNextRelease = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            return daysUntilNextRelease;
+        }
+        return 0;
     }
 
-
-
-    // Widget functions
-
-    // Assuming the structure of query_upcoming is like this:
-    // const query_upcoming: { release_date: string }[] = await worker.db.query(...);
-
-    async function calculateDaysUntilNextRelease(query_upcoming: any) { // Add the parameter
-      if (query_upcoming && query_upcoming.length > 0) {
-        const nextReleaseDate = new Date(query_upcoming[0].release_date);
-        const today = new Date();
-        const timeDiff = nextReleaseDate.getTime() - today.getTime();
-        const daysUntilNextRelease = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        
-        return daysUntilNextRelease;
-      }
-      
-      return 0;
-    }
-    
-
-    async function calculateTotalRewatchTime(query_runtime: any) {
-      if (query_runtime && query_runtime.length > 0) {
-          const totalRuntimeMinutes = query_runtime.reduce((total: any, entry: { runtime: any; }) => total + entry.runtime, 0);
-          const totalDays = Math.floor(totalRuntimeMinutes / (60 * 24));
-          const remainingMinutes = totalRuntimeMinutes % (60 * 24);
-          const totalHours = Math.floor(remainingMinutes / 60);
-          const totalMinutes = remainingMinutes % 60;
-  
-          return { days: totalDays, hours: totalHours, minutes: totalMinutes };
-      }
-  
-      return { days: 0, hours: 0, minutes: 0 };
-    }
-
-
-    // ICS blob generation
+    // Widget: Next event generation
     async function generateICSFile() {
       const nextWidget = query_upcoming[0] as {
-        title: string;
-        description: string;
-        release_date: string; // Adjust the type if needed
-        imdb: string; // Adjust the type if needed
-    };
-  
+          title: string;
+          description: string;
+          release_date: string;
+          imdb: string;
+      };
+
       if (!nextWidget) {
           return null;
       }
-  
+
       const { title, description, release_date, imdb } = nextWidget;
-  
+
       const startDate = new Date(release_date);
-      // const endDate = new Date(release_date);
-      // endDate.setDate(endDate.getDate() + 1); // Add one day to create an all-day event
-  
-      // Generate the .ics file content
+
       const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -326,200 +457,89 @@ SEQUENCE:0
 URL:${imdb}
 END:VEVENT
 END:VCALENDAR`;
-  
-      // Create a Blob from the icsContent
+
       const blob = new Blob([icsContent], { type: 'text/calendar' });
-  
-      // Create a URL for the Blob
+
       const blobUrl = URL.createObjectURL(blob);
-  
+
       return { blobUrl, title };
   }
-  
 
 
-
-
-    type WidgetColors = {
-      [key in 'Next' | 'Random' | 'Trivia' | 'Quiz' | 'Rewatch' | 'Music']: string;
-    };
-
-    async function fetchWidgets() {
-      const queryWidgets = await worker.db.query(`SELECT name, sorting FROM web_widgets`);
-    
-      const widgetColors: WidgetColors = {
-        Next: 'widget-next',
-        Random: 'widget-random',
-        Trivia: 'widget-trivia',
-        Quiz: 'widget-quiz',
-        Rewatch: 'widget-rewatch',
-        Music: 'widget-music'
-      };
-    
-      queryWidgets.forEach(async (widget: any) => {
-        const section = document.querySelector(`[name="${widget.sorting}"]`);
-        
-        if (section) {
-          const widgetElement = document.createElement('div');
-          widgetElement.classList.add('widget');
-          const backgroundColorId = widgetColors[widget.name as keyof WidgetColors]; // Type assertion here
-          
-          if (backgroundColorId) {
-            widgetElement.id = backgroundColorId;
-            widgetElement.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(`--${backgroundColorId}`);
-          }
-    
-          const widgetContentElement = document.createElement('div');
-          widgetContentElement.classList.add('widget-content');
-          
-          if (widget.name === 'Next') {
-            const daysUntilNextRelease = await calculateDaysUntilNextRelease(query_upcoming); // Pass query_upcoming here
-            widgetContentElement.textContent = `${daysUntilNextRelease} days until next release`;
-          }
-           else {
-            widgetContentElement.textContent = widget.name;
-          }
-
-          if (widget.name === 'Random') {
-            widgetContentElement.textContent = `Get random title from entire multiverse!`;
-          }
-
-          if (widget.name === 'Trivia') {
-            const randomTrivia = `<div class="widget-content-text">Tony Stark is Iron Man</div>`
-            widgetContentElement.innerHTML = `Did you know?${randomTrivia}`;
-          }
-
-          if (widget.name === 'Quiz') {
-            widgetContentElement.textContent = `Quiz`;
-          }
-
-          if (widget.name === 'Rewatch') {
-            const totalRewatchTime = await calculateTotalRewatchTime(query_runtime);
-            let rewatchTime = '';
-    
-            if (totalRewatchTime.days > 0) {
-                rewatchTime += `${totalRewatchTime.days} days `;
-            }
-    
-            if (totalRewatchTime.hours > 0) {
-                rewatchTime += `${totalRewatchTime.hours} hours `;
-            }
-    
-            rewatchTime += `${totalRewatchTime.minutes} minutes`;
-    
-            widgetContentElement.innerHTML = `
-                ${rewatchTime}
-                <div class="widget-content-text">need to rewatch all content</div>`;
-          }
-          
-          widgetElement.appendChild(widgetContentElement);
-    
-          if (widget.name === 'Next') {
-            const result = await generateICSFile();
-  
-            if (result !== null) {
-              const { blobUrl, title } = result; {
-                const widgetButtonElement = document.createElement('div');
-                widgetButtonElement.classList.add('widget-button');
-                widgetButtonElement.setAttribute('id', 'notify-btn');
-                widgetButtonElement.setAttribute('data-url', blobUrl); // ics blob url
-                widgetButtonElement.setAttribute('data-title', title); // project title
-                widgetButtonElement.textContent = 'Notify me';
-                widgetElement.appendChild(widgetButtonElement);
-              }
-            }
-          }
-
-          if (widget.name === 'Random') {
-            const widgetButtonElement = document.createElement('div');
-            widgetButtonElement.classList.add('widget-button');
-            widgetButtonElement.setAttribute('id', 'random-btn');
-            widgetButtonElement.textContent = 'Random!';
-            widgetElement.appendChild(widgetButtonElement);
-          }
-
-          if (widget.name === 'Trivia') {
-            const widgetButtonElement = document.createElement('div');
-            widgetButtonElement.classList.add('widget-button');
-            widgetButtonElement.setAttribute('id', 'trivia-btn');
-            widgetButtonElement.textContent = 'Another one!';
-            widgetElement.appendChild(widgetButtonElement);
-          }
-
-          if (widget.name === 'Rewatch') {
-            const widgetButtonElement = document.createElement('div');
-            widgetButtonElement.classList.add('widget-button');
-            widgetButtonElement.setAttribute('id', 'rewatch-checklist-btn');
-            widgetButtonElement.textContent = 'Rewatch Checklist';
-            widgetElement.appendChild(widgetButtonElement);
-          }
-    
-          section.appendChild(widgetElement);
+    // Widget: Rewatch onload info
+    async function calculateTotalRewatchTime(query_runtime: any) {
+        if (query_runtime && query_runtime.length > 0) {
+            const totalRuntimeMinutes = query_runtime.reduce((total: any, entry: { runtime: any; }) => total + entry.runtime, 0);
+            const totalDays = Math.floor(totalRuntimeMinutes / (60 * 24));
+            const remainingMinutes = totalRuntimeMinutes % (60 * 24);
+            const totalHours = Math.floor(remainingMinutes / 60);
+            const totalMinutes = remainingMinutes % 60;
+            return { days: totalDays, hours: totalHours, minutes: totalMinutes };
         }
-      });
+        return { days: 0, hours: 0, minutes: 0 };
     }
-    
-    
+
 
     await fetchSections();
     await fetchCategories();
     await fetchWidgets();
 
     return Promise.resolve();
-    
+
 }
+
+
 
 load().then(() => {
 
-  // Preloader
-  const preloader = document.querySelector('.preloader') as HTMLElement | null;
-  if (preloader) {
-    preloader.style.display = 'none';
-  }
-
-  // Window function
-
-  // Get data for window
-  function getProjectData(target: HTMLElement) {
-    const projectDiv = target.closest('.project') as HTMLElement;
-    if (!projectDiv) {
-      return null;
+    // Preloader
+    const preloader = document.querySelector('.preloader') as HTMLElement | null;
+    if (preloader) {
+        preloader.style.display = 'none';
     }
 
-    const name = projectDiv.getAttribute('name');
-    const type = projectDiv.getAttribute('data-type');
 
-    if (!name || !type) {
-      return null;
+    // Window: Get data
+    function getProjectData(target: HTMLElement) {
+        const projectDiv = target.closest('.project') as HTMLElement;
+        if (!projectDiv) {
+            return null;
+        }
+
+        const name = projectDiv.getAttribute('name');
+        const type = projectDiv.getAttribute('data-type');
+
+        if (!name || !type) {
+            return null;
+        }
+
+        const screenshotName = name
+            .toLowerCase()
+            .replace(/:/g, '')
+            .replace(/\?/g, '')
+            .replace(/\./g, '')
+            .replace(/-/g, '')
+            .replace(/['’]s?/g, '')
+            .replace(/\s/g, '_');
+
+        const screenshotUrl = `./img/screenshots/${screenshotName}.jpg`
+        const posterUrl = projectDiv.querySelector('.project-poster img') ?.getAttribute('src');
+        const description = projectDiv.querySelector('.project-description') ?.textContent;
+        const universe_data = `Universe data`
+
+        return {
+            name,
+            type,
+            posterUrl,
+            description,
+            screenshotUrl,
+            universe_data
+        };
     }
 
-    const screenshotName = name
-      .toLowerCase()
-      .replace(/:/g, '')
-      .replace(/\?/g, '')
-      .replace(/\./g, '')
-      .replace(/-/g, '')
-      .replace(/['’]s?/g, '')
-      .replace(/\s/g, '_');
-
-    const screenshotUrl = `./img/screenshots/${screenshotName}.jpg`
-    const posterUrl = projectDiv.querySelector('.project-poster img')?.getAttribute('src');
-    const description = projectDiv.querySelector('.project-description')?.textContent;
-    const universe_data = `Universe data`
-
-    return {
-      name,
-      type,
-      posterUrl,
-      description,
-      screenshotUrl,
-      universe_data
-    };
-  }
-
-  // Window template
-  function createProjectPageWindow(projectData: any): string {
-    return `
+    // Window: Template
+    function createProjectPageWindow(projectData: any): string {
+        return `
       <div class="project-page-close">
         <div class="project-page-close-button"></div>
         <div class="project-page-close-button-x"><span class="material-symbols-outlined">close</span></div>
@@ -579,112 +599,297 @@ load().then(() => {
 
     </div>
     `;
-  }
-
-  // Open window function
-  function openProjectWindow(event: Event) {
-    const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
-    const existingProjectPage = projectBackground.querySelector('.project-page') as HTMLElement;
-    const projectData = getProjectData(event.target as HTMLElement);
-
-    if (!projectData) {
-      return;
     }
 
-    if (!existingProjectPage) {
-      const projectPage = document.createElement('div');
-      projectPage.classList.add('project-page');
-      projectPage.setAttribute('name', projectData.name);
-      const projectPageWindow = createProjectPageWindow(projectData);
-      projectPage.innerHTML = projectPageWindow;
-      projectBackground.appendChild(projectPage);
-      const closeButton = projectPage.querySelector('.project-page-close-button') as HTMLElement;
-      if (closeButton) {
-        closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
-      }
-    } else {
-      const projectPageWindow = createProjectPageWindow(projectData);
-      existingProjectPage.setAttribute('name', projectData.name);
-      existingProjectPage.innerHTML = '';
-      existingProjectPage.innerHTML = projectPageWindow;
-      const closeButton = existingProjectPage.querySelector('.project-page-close-button') as HTMLElement;
-      if (closeButton) {
-        closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
-      }
+    // Window: Open
+    function openProjectWindow(event: Event) {
+        const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
+        const existingProjectPage = projectBackground.querySelector('.project-page') as HTMLElement;
+        const projectData = getProjectData(event.target as HTMLElement);
+
+        if (!projectData) {
+            return;
+        }
+
+        if (!existingProjectPage) {
+            const projectPage = document.createElement('div');
+            projectPage.classList.add('project-page');
+            projectPage.setAttribute('name', projectData.name);
+            const projectPageWindow = createProjectPageWindow(projectData);
+            projectPage.innerHTML = projectPageWindow;
+            projectBackground.appendChild(projectPage);
+            const closeButton = projectPage.querySelector('.project-page-close-button') as HTMLElement;
+            if (closeButton) {
+                closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
+            }
+        } else {
+            const projectPageWindow = createProjectPageWindow(projectData);
+            existingProjectPage.setAttribute('name', projectData.name);
+            existingProjectPage.innerHTML = '';
+            existingProjectPage.innerHTML = projectPageWindow;
+            const closeButton = existingProjectPage.querySelector('.project-page-close-button') as HTMLElement;
+            if (closeButton) {
+                closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
+            }
+        }
+        projectBackground.style.display = 'block';
+        document.body.style.overflow = 'hidden';
     }
-    projectBackground.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }
 
-  // Close window function
-  function closeProjectWindow(projectBackground: HTMLElement) {
-    projectBackground.style.display = 'none';
-    document.body.style.overflow = 'auto';
-  }
-  
-  // Event listener for close button
-  document.addEventListener('click', (event: Event) => {
-    const target = event.target as HTMLElement;
-    if (
-      target.classList.contains('project-page-background') ||
-      target.classList.contains('project-page-close-button') ||
-      target.classList.contains('material-symbols-outlined')
-    ) {
-      closeProjectWindow(document.querySelector('.project-page-background') as HTMLElement);
+    // Window: Close
+    function closeProjectWindow(projectBackground: HTMLElement) {
+        projectBackground.style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
-  });
-  
-  // Listener for open window
-  const projectDivs = document.querySelectorAll('.project');
-  projectDivs.forEach((projectDiv) => {
-    projectDiv.addEventListener('click', openProjectWindow);
-  });
+
+    // Window: Close listener
+    document.addEventListener('click', (event: Event) => {
+        const target = event.target as HTMLElement;
+        if (
+            target.classList.contains('project-page-background') ||
+            target.classList.contains('project-page-close-button') ||
+            target.classList.contains('material-symbols-outlined')
+        ) {
+            closeProjectWindow(document.querySelector('.project-page-background') as HTMLElement);
+        }
+    });
+
+    // Window: Open listener
+    const projectDivs = document.querySelectorAll('.project');
+    projectDivs.forEach((projectDiv) => {
+        projectDiv.addEventListener('click', openProjectWindow);
+    });
 
 
-  // Widgets
 
-  // widgetNext
-  const notifyButton = document.getElementById('notify-btn');
-if (notifyButton) {
-    notifyButton.addEventListener('click', () => {
-        const icsBlobUrl = notifyButton.getAttribute('data-url');
-        const projectTitle = notifyButton.getAttribute('data-title');
-        if (icsBlobUrl) {
-            // Open the .ics file
-            // window.location.href = icsBlobUrl;
-            const a = document.createElement('a');
-        
-            // Set the href and download attributes
-            a.href = icsBlobUrl;
-            a.download = projectTitle + '.ics'; // Set the desired filename here
-            
-            // Programmatically click the <a> element
-            a.click();
+  // Widget: Next
+    const notifyButton = document.getElementById('notify-btn');
+    if (notifyButton) {
+        notifyButton.addEventListener('click', () => {
+            const icsBlobUrl = notifyButton.getAttribute('data-url');
+            const projectTitle = notifyButton.getAttribute('data-title');
+            if (icsBlobUrl) {
+                const a = document.createElement('a');
+                a.href = icsBlobUrl;
+                a.download = projectTitle + '.ics';
+                a.click();
+            }
+        });
+    }
+
+
+// Widget: Trivia
+    const triviaButton = document.getElementById('trivia-btn');
+if (triviaButton) {
+    triviaButton.addEventListener('click', async () => {
+
+        const query_trivia = await worker.db.query(`SELECT * FROM universe_trivia`);
+
+        if (query_trivia.length === 0) {
+            console.log("No trivia found");
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * query_trivia.length);
+
+        const randomTrivia = query_trivia[randomIndex] as {
+            trivia: string;
+            project: string;
+        };
+
+        const { trivia, project } = randomTrivia;
+
+        const widgetTriviaElement = document.getElementById('widget-trivia');
+        if (widgetTriviaElement) {
+
+            const widgetTextContentElement = widgetTriviaElement.querySelector('.widget-text-c');
+            if (widgetTextContentElement) {
+                widgetTextContentElement.textContent = trivia;
+            }
+
+            const widgetTextDescriptionElement = widgetTriviaElement.querySelector('.widget-text-d');
+            if (widgetTextDescriptionElement) {
+                widgetTextDescriptionElement.textContent = project;
+            }
         }
     });
 }
 
-  function widgetRandom(){
+
+// Widget: Random
+const randomButton = document.getElementById('random-btn');
+if (randomButton) {
+    randomButton.addEventListener('click', async () => {
+
+        const query_random = await worker.db.query(`SELECT * FROM titles_movies`);
+
+        if (query_random.length === 0) {
+            console.log("No titles found");
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * query_random.length);
+
+        const randomTitle = query_random[randomIndex] as {
+            title: string;
+            type: string;
+        };
+
+        const { title, type } = randomTitle;
+
+        const widgetTriviaElement = document.getElementById('widget-random');
+        if (widgetTriviaElement) {
+
+            const widgetTextHeaderElement = widgetTriviaElement.querySelector('.widget-text-h');
+            if (widgetTextHeaderElement) {
+                widgetTextHeaderElement.textContent = type;
+            }
+
+            const widgetTextContentElement = widgetTriviaElement.querySelector('.widget-text-c');
+            if (widgetTextContentElement) {
+                widgetTextContentElement.textContent = title;
+            }
+
+            // Load ${project} in div inside widget div with  `widget-text-d` class
+            // const widgetTextDescriptionElement = widgetTriviaElement.querySelector('.widget-text-d');
+            // if (widgetTextDescriptionElement) {
+            //     widgetTextDescriptionElement.textContent = project;
+            // }
+        }
+    });
+}
+
     
-  }
+// Menu: Notifications
+const notificationsButton = document.getElementById('notifications-btn');
+const notificationsMenu = document.getElementById('menu-notifications');
 
-  function widgetTrivia(){
-    
-  }
+if (notificationsButton && notificationsMenu) {
+    let menuOpen = false;
 
-  function widgetQuiz(){
-    
-  }
+    const openMenu = () => {
+        notificationsMenu.style.display = 'block';
+        menuOpen = true;
+    };
 
-  function widgetRewatch(){
-    
-  }
+    const closeMenu = () => {
+        notificationsMenu.style.display = 'none';
+        menuOpen = false;
+    };
 
-  function widgetMusic(){
+    notificationsButton.addEventListener('click', () => {
+        if (menuOpen) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
 
-  }
+    document.addEventListener('click', (event) => {
+        const target = event.target as Node;
+        if (!notificationsMenu.contains(target) && !notificationsButton.contains(target)) {
+            closeMenu();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeMenu();
+        }
+    });
+}
+
+// Button: Subscribe
+const subscribeButton = document.getElementById('subscribe-btn');
+    if (subscribeButton) {
+      subscribeButton.addEventListener('click', () => {
+            const telegramLink = 'https://t.me/mcurandom';
+              window.open(telegramLink);
+        });
+    }
+
+
+// Menu: Settings
+const settingsButton = document.getElementById('settings-btn');
+const settingsMenu = document.getElementById('menu-settings');
+
+if (settingsButton && settingsMenu) {
+    let menuOpen = false;
+
+    const openMenu = () => {
+      settingsMenu.style.display = 'block';
+        menuOpen = true;
+    };
+
+    const closeMenu = () => {
+      settingsMenu.style.display = 'none';
+        menuOpen = false;
+    };
+
+    settingsButton.addEventListener('click', () => {
+        if (menuOpen) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        const target = event.target as Node;
+        if (!settingsMenu.contains(target) && !settingsButton.contains(target)) {
+            closeMenu();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeMenu();
+        }
+    });
+}
+
+
+
+// Menu: Settings in Next widget
+const widgetSettingsNextButton = document.getElementById('Next-btn');
+const widgetSettingsNextMenu = document.getElementById('next-menu-settings');
+
+if (widgetSettingsNextButton && widgetSettingsNextMenu) {
+    let menuOpen = false;
+
+    const openMenu = () => {
+      widgetSettingsNextMenu.style.display = 'block';
+        menuOpen = true;
+    };
+
+    const closeMenu = () => {
+      widgetSettingsNextMenu.style.display = 'none';
+        menuOpen = false;
+    };
+
+    widgetSettingsNextButton.addEventListener('click', () => {
+        if (menuOpen) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        const target = event.target as Node;
+        if (!widgetSettingsNextMenu.contains(target) && !widgetSettingsNextButton.contains(target)) {
+            closeMenu();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeMenu();
+        }
+    });
+}
+
+
 
 
 });
-
-

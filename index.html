@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>MCU Random</title>
-    <!-- iOS Launch Screens -->
     <link rel="apple-touch-startup-image" href="./favicon/apple-splash-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     <link rel="apple-touch-startup-image" href="./favicon/apple-splash-2732-2048.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)">
     <link rel="apple-touch-startup-image" href="./favicon/apple-splash-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
@@ -36,19 +34,19 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="title" content="MCU Random">
-    <meta name="description" content="MCU Random">
+    <meta name="description" content="A ultimate guide for entitre Marvel Cinematic Universe">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="">
     <meta property="og:title" content="MCU Random">
-    <meta property="og:description" content="MCU Random">
-    <meta property="og:image" content="./favicon/preview012.jpg">
+    <meta property="og:description" content="A ultimate guide for entitre Marvel Cinematic Universe">
+    <meta property="og:image" content="./favicon/preview.jpg">
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="">
     <meta property="twitter:title" content="MCU Random">
-    <meta property="twitter:description" content="MCU Random">
-    <meta property="twitter:image" content="./favicon/preview012.jpg">
+    <meta property="twitter:description" content="A ultimate guide for entitre Marvel Cinematic Universe">
+    <meta property="twitter:image" content="./favicon/preview.jpg">
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png">
@@ -56,163 +54,158 @@
     <link rel="manifest" href="./favicon/site.webmanifest">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="styles.css">
-
-    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@NaN,0,0,0" /> -->
-    
 </head>
 
 <body>
+    <!-- Header -->
     <div class="header">
         <div class="header-content">
             <div class="header-logo"><img src="./img/mcurandom_logo.svg"></div>
         </div>
+        <div class="header-menu">
+            <!-- <div class="header-menu-item">
+                <div class="header-menu-item-icon"><span class="material-symbols-outlined">notifications_active</span></div>
+                <div class="header-menu-title">Updates</div>
+            </div>
+            <div class="header-menu-item">
+                <div class="header-menu-item-icon"><span class="material-symbols-outlined">settings</span></div>
+                <div class="header-menu-title">Settings</div>
+            </div> -->
+            <div class="header-menu-item" id="notifications-btn"><span class="material-symbols-outlined">notifications_active</span></div>
+            <div class="header-menu-item" id="settings-btn"><span class="material-symbols-outlined">settings</span></div>
+        </div>
+
+        <div class="menu" id="menu-notifications">
+            <div class="menu-content">
+                <div class="menu-header">Notifications</div>
+                <div class="menu-text-h">
+                    Get latest updates about new functions and database updates via Telegram!
+                </div>
+                <div class="menu-button" id="subscribe-btn">Subscribe</div>
+            </div>
+        </div>
+
+        <div class="menu" id="menu-settings">
+            <div class="menu-content">
+                <div class="menu-header">Settings</div>
+                
+                <div class="menu-block-header">Appearance</div>
+                <div class="themes">
+                    <div class="theme-preview">
+                        <div class="theme-image active"><img src="./icons/themes/theme_light.jpg"></div>
+                        <div class="theme-name">Light</div>
+                    </div>
+                    <div class="theme-preview">
+                        <div class="theme-image"><img src="./icons/themes/theme_dark.jpg"></div>
+                        <div class="theme-name">Dark</div>
+                    </div>
+                    <div class="theme-preview">
+                        <div class="theme-image"><img src="./icons/themes/theme_shield.jpg"></div>
+                        <div class="theme-name">S.H.I.E.L.D.</div>
+                    </div>
+                </div>
+                <hr>
+                <div class="setting"><input type="checkbox"><div>Follow device theme setting</div></div>
+                <br>
+                <div class="menu-block-header">Globals</div>
+                <div class="setting"><input type="checkbox"><div>Show Categories in Grid mode</div></div>
+            </div>
+        </div>
+
     </div>
-
-
+    <!-- Window -->
     <div class="project-page-background">
-        
     </div>
-
-
-
-
+    <!-- Preloader -->
     <div class="preloader">
-
         <div class="section">
             <div class="category-block">
                 <div class="category-name-preloader"></div>
                 <div class="category-description-preloader"></div>
                 <div class="category-titles-preloader">
-
                     <div class="project-preloader">
                         <div class="project-poster-preloader glow-effect"></div>
                         <div class="project-name-preloader glow-effect"></div>
                         <div class="project-data-preloader glow-effect"></div>
                         <div class="project-data-preloader glow-effect"></div>
                     </div>
-
                 </div>
             </div>
-            
             <div class="category-block">
                 <div class="category-name-preloader"></div>
                 <div class="category-description-preloader"></div>
                 <div class="category-titles-preloader">
-                    
                     <div class="project-preloader">
                         <div class="project-poster-preloader"></div>
                         <div class="project-name-preloader"></div>
                         <div class="project-data-preloader"></div>
                         <div class="project-data-preloader"></div>
                     </div>
-
                     <div class="project-preloader">
                         <div class="project-poster-preloader"></div>
                         <div class="project-name-preloader"></div>
                         <div class="project-data-preloader"></div>
                         <div class="project-data-preloader"></div>
                     </div>
-
                     <div class="project-preloader">
                         <div class="project-poster-preloader"></div>
                         <div class="project-name-preloader"></div>
                         <div class="project-data-preloader"></div>
                         <div class="project-data-preloader"></div>
                     </div>
-
                     <div class="project-preloader">
                         <div class="project-poster-preloader"></div>
                         <div class="project-name-preloader"></div>
                         <div class="project-data-preloader"></div>
                         <div class="project-data-preloader"></div>
                     </div>
-
                     <div class="project-preloader">
                         <div class="project-poster-preloader"></div>
                         <div class="project-name-preloader"></div>
                         <div class="project-data-preloader"></div>
                         <div class="project-data-preloader"></div>
                     </div>
-
                 </div>
             </div>
-
         </div>
-
     </div>
 
+    <!-- Content -->
     <div class="content">
-            <div id="sectionsContainer"></div>
+        <div id="sectionsContainer"></div>
     </div>
-
-    <!-- <div class="edit_function">
-        <div class="edit_button">Edit</div>
-    </div> -->
-
+    <!-- Footer -->
     <div class="footer">
-
         <div class="footer-about">
-            <img class="footer-logo" src="./img/logos/mcurandom_logo_gray.svg"> — it's a ultimate guide for entitre Marvel Cinematic Universe. Explore a comprehensive database of MCU projects, easter eggs and connections to other cinematic universes, get notifications and be updated about upcoming releases, get random title with Random function, rewatch MCU with help of Rewatch Checklist and more.
+            <img class="footer-logo" src="./img/logos/mcurandom_logo_gray.svg"> — a ultimate guide for entitre Marvel Cinematic Universe. Explore a comprehensive database of MCU projects, easter eggs and connections to other cinematic universes, be updated about upcoming releases, get random title from entire multiverse, rewatch MCU with help of Rewatch Checklist and much more.
         </div>
         <div class="footer-sources">
             <div class="footer-source">
                 <div class="footer-text">This sources helps build MCU Random:</div>
                 <div class="footer-links">
-                    <a href="#">MCU VIEWING ORDER</a>
-                    <a href="#">Marvel Entertainment</a>
-                    <a href="#">IMDb</a>
-                    <a href="#">Wikipedia</a>
-                </div>
-            </div>
-            <div class="footer-source">
-                <div class="footer-text">Resources worth to be noticed:</div>
-                <div class="footer-links">
-                    <a href="#">r/marvelstudios</a>
-                    <a href="#">Marvel Studios Movies</a>
-                    <a href="#">Qewbite</a>
+                    <a href="https://docs.google.com/spreadsheets/d/1Xfe--9Wshbb3ru0JplA2PnEwN7mVawazKmhWJjr_wKs/" target="_blank">MCU VIEWING ORDER</a>
+                    <a href="https://www.marvel.com" target="_blank">Marvel Entertainment</a>
+                    <a href="https://www.imdb.com" target="_blank">IMDb</a>
+                    <a href="https://en.wikipedia.org/wiki/Marvel_Cinematic_Universe" target="_blank">Wikipedia</a>
+                    <a href="https://www.reddit.com/r/marvelstudios/" target="_blank">r/marvelstudios</a>
+                    <a href="https://vk.com/marvel_studios" target="_blank">Marvel Studios Movies</a>
+                    <a href="https://www.youtube.com/@QWBT" target="_blank">Qewbite</a>
                 </div>
             </div>
         </div>
-
         <div class="footer-copyright">
             This website provides content for informational purposes, including movie titles, posters, and related information. The displayed content belongs to respective owners like Marvel Entertainment and Sony Entertainment. We do not claim ownership of any copyrighted material related to the Marvel Cinematic Universe or any other cinematic universes. Our aim is to offer an informative and enjoyable experience for users interested in the MCU. If you are the rightful owner of any displayed content and want it removed or need specific attribution, please contact us. We respect copyright holders' rights and comply with applicable laws and regulations.
         </div>
-
         <div class="footer-block">
             <div class="footer-year">
-                Source on <a href="#">GitHub</a> © 2023 MCURandom.
+                Source on <a href="https://github.com/captainmarshin/mcurandom" target="_blank">GitHub</a> © 2023 MCURandom.
             </div>
-
             <div class="footer-author">
-                <a href="#">Assembled by <img class="me-logo" src="img/logos/me-logo.svg"></a>
+                <a href="http://marshinentertainment.com" target="_blank">Assembled by <img class="me-logo" src="img/logos/me-logo.svg"></a>
             </div>
         </div>
-
     </div>
-        <script src="./dist/bundle.js"></script>
-
+    <script src="./dist/bundle.js"></script>
 </body>
 
 </html>
-
-
-
-<!-- <div class="widget red">
-    <div class="widget-content">Get random title from entire universe</div>
-    <div class="widget-button">Random</div>
-</div>
-
-<div class="widget yellow">
-    <div class="widget-content">Did you know?</div>
-    <div class="widget-button">Another one!</div>
-</div>
-
-<div class="widget skyblue">
-    <div class="widget-content">To watch all content from Marvel Cinematic Universe you need</div>
-    <div class="widget-button">Rewatch Checklist</div>
-</div>
-
-<div class="widget pink">
-    <div class="widget-content">Random song</div>
-    <div class="widget-button">Open Playlist</div>
-</div> -->

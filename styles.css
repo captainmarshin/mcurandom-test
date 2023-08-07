@@ -6,6 +6,7 @@
     -webkit-user-select: none;
     /* Safari */
     user-select: none;
+    touch-action: pan-y;
 }
 
 ::-webkit-scrollbar {
@@ -117,7 +118,7 @@ hr{
 
 
 .header-menu-item:hover {
-    background-color: #efefef;
+    /* background-color: #efefef; */
     color: #ec2424;
 }
 
@@ -151,9 +152,9 @@ hr{
     background-color: #fff;
     border: 1px solid #eee;
     border-radius: 15px;
-    -webkit-box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.05);
-    -moz-box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.05);
-    box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.05);
+    -webkit-box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.10);
+    -moz-box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.10);
+    box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.10);
 }
 
 .menu-content{
@@ -660,6 +661,14 @@ hr{
     cursor: pointer;
 }
 
+.widget-info {
+    padding: 15px;
+    color: #111;
+    text-align: left;
+    font-weight: normal;
+    display: none;
+}
+
 
 .widget-content {
     text-align: center;
@@ -996,7 +1005,7 @@ input[type="checkbox"]:disabled {
 }
 
 .project-page-close-button-x {
-    color: rgba(150, 150, 150, 0.9);
+    color: rgba(124, 124, 124, 0.5);
     padding: 10px 10px 6px 10px;
     right: 10px;
     top: 10px;
@@ -1051,7 +1060,7 @@ input[type="checkbox"]:disabled {
     transform: translateZ(0) scale(2.2);
     z-index: 2;
     position: relative;
-    margin-top: -60px;
+    margin-top: -110px;
 }
 
 
@@ -1066,6 +1075,7 @@ input[type="checkbox"]:disabled {
     font-weight: bold;
     padding-top: 30px;
     padding-left: 30px;
+    padding-bottom: 10px;
 }
 
 .header-button {
@@ -1135,7 +1145,7 @@ input[type="checkbox"]:disabled {
     margin-bottom: 7px;
     padding-left: 30px;
     padding-right: 30px;
-    
+
 }
 
 /* Project description */
@@ -1183,39 +1193,98 @@ input[type="checkbox"]:disabled {
 
 .project-page-episode {
     height: auto;
-    padding: 20px 10px 20px 108px;
     border: 1px solid #eee;
-    border-radius: 10px;
+    border-radius: 6px;
     display: flex;
-    gap: 14px;
-    min-width: 280px;
-    max-width: 300px;
-    height: 100px;
-    background-repeat: no-repeat;
-    background-size: contain;
+    gap: 5px;
+    min-width: 320px;
+    height: 112px;
+    display: flex;
+    align-items: center;
+    justify-content: left;   
+}
+
+.project-season-cover img{
+    height: 112px;
+    width: auto;
+    border-radius: 6px 0 0 6px;
+    vertical-align: -3px;
+    /* aspect-ratio: 1 / 1;
+    object-fit: cover; */
+}
+
+.project-page-season-header{
+    font-size: 1em;
+    font-weight: bold;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 10px;
+    padding-top: 20px;
+}
+
+.project-page-season-header .season-grid-view{
+    text-align: right;
+    float: right;
+    font-weight: normal;
+    font-size: 0.8em;
+    color: #ec2424;
+}
+
+.project-page-season-header .season-grid-view:hover{
+    color: #ec2424;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.project-page-seasons-section {
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 10px;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    display: flex;
+    gap: 26px;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.project-page-seasons-section:last-child{
+    padding-bottom: 30px
 }
 
 .project-page-episode-number {
-    font-size: 1.8em;
-    text-align: right;
-    font-weight: bold;
-    margin-top: -4px;
+    font-size: 0.8em;
+    color: #444;
 }
 
-.project-epsiode-details {}
+.project-epsiode-details {
+    padding: 10px;
+}
 
 .project-episode-name {
+    font-size: 0.9em;
     font-weight: bold;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 
 .project-episode-description {
-    margin-bottom: 10px;
+    font-size: 0.8em;
+    margin-bottom: 3px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .project-episode-release-date {
-    margin-bottom: 8px;
-    font-size: 0.9em;
+    font-size: 0.8em;
+    color: #777;
 }
 
 .project-page-episode .project-poster {
@@ -1268,9 +1337,14 @@ input[type="checkbox"]:disabled {
     font-size: 1.2em;
     font-weight: bold;
     width: fit-content;
-    border-left: 3px solid #f5c518;
+    border-left: 3px solid #ec2424;
     padding-left: 8px;
     color: #000000;
+}
+
+.project-page-link a{
+    color: #000000;
+    text-decoration: none;
 }
 
 .project-page-link:hover {
@@ -1280,7 +1354,7 @@ input[type="checkbox"]:disabled {
 
 .project-page-link:hover .material-symbols-outlined {
     cursor: pointer;
-    color: #f5c518;
+    color: #ec2424;
     transition: color 0.3s;
 }
 
@@ -1292,9 +1366,6 @@ input[type="checkbox"]:disabled {
     transition: color 0.3s;
 }
 
-.link-imdb {
-    color: #f5c518;
-}
 
 
 
@@ -1310,6 +1381,30 @@ input[type="checkbox"]:disabled {
     .header{
         padding-top: env(safe-area-inset-top);
         /* height: env(safe-area-inset-top) */
+    }
+
+    .content {
+        margin-top: calc(env(safe-area-inset-top) + 110px);
+        /* margin-top: 110px; */
+    }
+
+    .preloader{
+        margin-top: calc(env(safe-area-inset-top) + 110px);
+    }
+
+    .menu{
+        /* top: calc(env(safe-area-inset-top) + 60px); */
+        width: 100%;
+        height: auto;
+        overflow-y: scroll;
+        position: fixed;
+        top: auto; /* Reset the top value */
+        bottom: 0; /* Attach to the bottom of the browser window */
+        left: 0;
+        right: 0;
+        padding: 10px;
+        padding-bottom: env(safe-area-inset-top);
+        box-sizing: border-box;
     }
 
     /* Project page mobile window */

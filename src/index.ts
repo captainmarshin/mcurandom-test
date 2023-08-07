@@ -235,17 +235,12 @@ async function load() {
                         releasedateElement.classList.add('project-date');
                         releasedateElement.textContent = content.release_date;
 
-                        const descriptionElement = document.createElement('div');
-                        descriptionElement.classList.add('project-description');
-                        descriptionElement.textContent = content.description;
-
                         contentElement.appendChild(posterElement);
                         contentElement.appendChild(titleElement);
                         contentElement.appendChild(typeElement);
                         contentElement.appendChild(sagaElement);
                         contentElement.appendChild(phaseElement);
                         contentElement.appendChild(releasedateElement);
-                        contentElement.appendChild(descriptionElement);
 
                         if (categoryName === 'Running now') {
                             const categoryDescriptionElement = categoryTitlesElement.previousElementSibling;
@@ -333,6 +328,11 @@ async function load() {
 
               widgetElement.appendChild(widgetContentElement);
 
+              // Widget Content
+              const widgetInfoElement = document.createElement('div');
+              widgetInfoElement.classList.add('widget-info');
+              widgetElement.appendChild(widgetInfoElement);
+
               // --------
 
 
@@ -355,6 +355,15 @@ async function load() {
                       widgetButtonElement.textContent = 'Notify me';
                       widgetElement.appendChild(widgetButtonElement);
                   }
+
+                  widgetInfoElement.innerHTML = `
+                  Next widget show days until nearest upcoming project. You can press Notify me button to create event for your
+                  stock Calendar app. Don't forget to set Alert to don't miss the premiere! In event you can get more info about upcoming
+                  project by open link inside. IMDb Showtimes link will show theatre near your location with premieres in it, so
+                  you can simply check where to watch project in day of premiere.
+                  Notice, that dates in USA/New York timezone.
+                  `;
+
               }
 
               if (widget.name === 'Random') {
@@ -364,6 +373,14 @@ async function load() {
                   widgetButtonElement.setAttribute('id', 'random-btn');
                   widgetButtonElement.textContent = 'Random!';
                   widgetElement.appendChild(widgetButtonElement);
+
+                  widgetInfoElement.innerHTML = `
+                  Random widget give you random title from entire multiverse. You can also set from which type of categories
+                  doing random.
+
+                  <div> <input type="checkbox"><span>Setting 1</span></div>
+                  `;
+
               }
 
               if (widget.name === 'Trivia') {
@@ -377,10 +394,25 @@ async function load() {
                   widgetButtonElement.setAttribute('id', 'trivia-btn');
                   widgetButtonElement.textContent = 'Another one!';
                   widgetElement.appendChild(widgetButtonElement);
+
+                  widgetInfoElement.innerHTML = `
+                  Trivia widget show you random interesting fact or easter egg from entire multiverse. You can use Another one!
+                  button to show new fact. Spoilered items is blurred by default.
+
+                  <div> <input type="checkbox"><span>Blur potentional spoilers</span></div>
+                  `;
+
               }
 
               if (widget.name === 'Quiz') {
                   widgetTextContentElement.textContent = `Quiz`;
+
+                  widgetInfoElement.innerHTML = `
+                  Quiz widget show you random question about Marvel Universe knowledge. You can use Another one! button to show new
+                  question. Spoilered questions is disabled by default
+
+                  <div> <input type="checkbox"><span>Disable spoiler questions</span></div>
+                  `;
               }
 
               if (widget.name === 'Rewatch') {
@@ -400,6 +432,13 @@ async function load() {
                   widgetButtonElement.setAttribute('id', 'rewatch-checklist-btn');
                   widgetButtonElement.textContent = 'Rewatch Checklist';
                   widgetElement.appendChild(widgetButtonElement);
+
+                  widgetInfoElement.innerHTML = `
+                  Rewatch widget show how many time need to spend to rewatch entire multiverse content. You can also check istamate
+                  time for different categories and types of projects.
+
+                  Rewatch Checklist button opens Rewatch Checklist, where you can combine and print checklist to rewatch universe projects.
+                  `;
               }
 
               if (widget.name === 'Music') {
@@ -408,6 +447,11 @@ async function load() {
                   widgetButtonElement.setAttribute('id', 'music-btn');
                   widgetButtonElement.textContent = 'Listen';
                   widgetElement.appendChild(widgetButtonElement);
+
+                  widgetInfoElement.innerHTML = `
+                  Music widget show random song from Marvel Music. It can be project soundtrack or music used in it. You can listen preview
+                  of song not leaving page. For listen full track use Open Playlist button to listen Marvel Music on streaming platforms.
+                  `;
               }
 
               section.appendChild(widgetElement);
@@ -540,113 +584,154 @@ load().then(() => {
           }
       }
 
-
-
-        const screenshotName = name
-            .toLowerCase()
-            .replace(/:/g, '')
-            .replace(/\?/g, '')
-            .replace(/\./g, '')
-            .replace(/-/g, '')
-            .replace(/['’]s?/g, '')
-            .replace(/\s/g, '_');
-
-        const screenshotUrl = `./img/screenshots/${screenshotName}.jpg`
         const posterUrl = projectDiv.querySelector('.project-poster img') ?.getAttribute('src');
-        const description = projectDiv.querySelector('.project-description') ?.textContent;
-        const universe_data = results
-        const episodes_data = episodesResults
+        // const description = projectDiv.querySelector('.project-description') ?.textContent;
+        const project_data = results.find(result => result.tableName.includes('titles'))?.rows[0] || {};
+        // const details_data = results.find(result => result.tableName.includes('titles'))?.rows[0] || {};
+        // const link_data = results.find(result => result.tableName.includes('titles'))?.rows[0] || {};
+        
+        const episodes_data = episodesResults.flatMap(result => result.rows);
 
         return {
             name,
             type,
             posterUrl,
-            description,
-            screenshotUrl,
-            universe_data,
+            project_data,
             episodes_data
         };
+
     }
 
     // Window: Template
     function createProjectPageWindow(projectData: any): string {
-        return `
-      <div class="project-page-close">
-        <div class="project-page-close-button"></div>
-        <div class="project-page-close-button-x"><span class="material-symbols-outlined">close</span></div>
-      </div>
-
-      <div class="project-page-header-little">
-        <div class="project-page-header-content">
-            <div class="project-page-header-little-title">${projectData.name}</div>
-            <div class="project-page-header-little-type">${projectData.type}</div>
-        </div>
-        </div>
-
-      <div class="project-page-cover" style="background-image: url('${projectData.posterUrl}');"></div>
-
-      <div class="project-page-content">
-        <div class="project-page-card-block">
-          <div class="project-page-card">
-            <div class="project-poster"><img src="${projectData.posterUrl}"></div>
-            <div class="project-page-name">${projectData.name}</div>
-            <div class="project-page-type">${projectData.type}</div>
+        const episodeSection = (projectData.type === 'TV Show' || projectData.type === 'Web series') && projectData.episodes_data.length > 0
+            ? `
+                <div class="project-page-episodes">
+                <div class="project-page-header">Episodes</div>
+                    ${createSeasonSections(projectData.episodes_data)}
+                </div>`
+            : '';
+    
+        function createSeasonSections(episodes: any[]): string {
+            const seasonsMap = new Map();
+    
+            for (const episode of episodes) {
+                if (!seasonsMap.has(episode.season)) {
+                    seasonsMap.set(episode.season, []);
+                }
+                seasonsMap.get(episode.season).push(episode);
+            }
+    
+            return [...seasonsMap.entries()].map(([season, seasonEpisodes]) => `
+            <div class="project-page-season-header">Season ${season} <span class="season-grid-view">Grid view</span></div>
+                <div class="project-page-seasons-section">
+                    ${seasonEpisodes.map((episode: { poster: any; episode_id: any; episode_title: any; description: any; release_date: any; }) => `
+                        <div class="project-page-episode">
+                            <div class="project-season-cover"><img src="${episode.poster}"></div>
+                            <div class="project-epsiode-details">
+                                <div class="project-episode-name">${episode.episode_title}</div>
+                                <div class="project-episode-description">${episode.description}</div>
+                                <div class="project-episode-release-date">Episode ${episode.episode_id} • ${episode.release_date}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+    
+      return `
+          <div class="project-page-close">
+              <div class="project-page-close-button"></div>
+              <div class="project-page-close-button-x"><span class="material-symbols-outlined">close</span></div>
           </div>
-        </div>
-      </div>
-
-      <div class="project-page-description">
-        ${projectData.description}
-      </div>
-
-      <div class="project-page-universe">
-        <div class="project-page-section-content">
-        ${projectData.universe_data.map((item: { tableName: any; rows: any[]; }) => `
-        <div class="universe-data-item">
-            <div class="table-name">${item.tableName}</div>
-            <div class="table-rows">${item.rows.map(row => `
-                <div class="table-row">${JSON.stringify(row)}</div>
-            `).join('')}</div>
-        </div>
-    `).join('')}
-        </div>
-      </div>
-
-      <div class="project-page-episodes">
-          <div class="project-page-header">Episodes</div>
-          <div class="project-page-section-content">
-          ${projectData.episodes_data.map((item: { tableName: any; rows: any[]; }) => `
-          <div class="universe-data-item">
-              <div class="table-name">${item.tableName}</div>
-              <div class="table-rows">${item.rows.map(row => `
-                  <div class="table-row">${JSON.stringify(row)}</div>
-              `).join('')}</div>
+  
+          <div class="project-page-header-little">
+            <div class="project-page-header-content">
+              <div class="project-page-header-little-title">${projectData.name}</div>
+              <div class="project-page-header-little-type">${projectData.type}</div>
+            </div>
           </div>
-      `).join('')}
+  
+          <div class="project-page-cover" style="background-image: url('${projectData.posterUrl}');"></div>
+  
+          <div class="project-page-content">
+  
+              <div class="project-page-card-block">
+                  <div class="project-page-card">
+                      <div class="project-poster"><img src="${projectData.posterUrl}"></div>
+                      <div class="project-page-name">${projectData.name}</div>
+                      <div class="project-page-type">${projectData.type}</div>
+                  </div>
+              </div>
+  
+              <div class="project-page-description">
+                  ${projectData.project_data.description}
+              </div>
+  
           </div>
-      </div>
-
-      <div class="project-page-characters">
-          <div class="project-page-header">Characters</div>
-          <div class="project-page-section-content">
-              
+  
+          <div class="project-page-universe">
+              <div class="project-page-section-content">
+                  ${projectData.project_data.phase ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Phase</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.phase}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.saga ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Saga</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.saga}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.storyorder ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Story order</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.storyorder}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.universe ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Universe</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.universe}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.story_date ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Story date</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.story_date}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.series ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Series</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.series}</div>
+                  </div>` : ''}
+              </div>
           </div>
-      </div>
-
-      <div class="project-page-details">
-          <div class="project-page-header">Details</div>
-          <div class="project-page-section-content">
-              
+  
+          ${episodeSection}
+  
+          <div class="project-page-details">
+              <div class="project-page-section-content">
+                  ${projectData.project_data.release_date ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Release date</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.release_date}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.studio ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Studio</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.studio}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.director ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Director</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.director}</div>
+                  </div>` : ''}
+                  ${projectData.project_data.runtime ? `<div class="project-page-info-block">
+                      <div class="project-page-info-block-name">Runtime</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.runtime}</div>
+                  </div>` : ''}
+              </div>
           </div>
-      </div>
-
-      <div class="project-page-links">
-          <div class="project-page-link">Open on <span class="link-imdb"> IMDb</span> <span class="material-symbols-outlined">chevron_right</span></div>
-      </div>
-
-    </div>
-    `;
-    }
+  
+          <div class="project-page-links">
+              <div class="project-page-link">
+                  <a href="${projectData.project_data.imdb}" target="_blank">Learn more <span class="material-symbols-outlined">chevron_right</span></a>
+              </div>
+          </div>
+      `;
+  }
+  
+  
+  
 
     // Window: Open
     async function openProjectWindow(event: Event) {

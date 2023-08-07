@@ -627,7 +627,7 @@ load().then(() => {
                 <div class="project-page-seasons-section">
                     ${seasonEpisodes.map((episode: { poster: any; episode_id: any; episode_title: any; description: any; release_date: any; }) => `
                         <div class="project-page-episode">
-                            <div class="project-season-cover"><img src="${episode.poster}"></div>
+                            <div class="project-season-cover"><img src=".${episode.poster}"></div>
                             <div class="project-epsiode-details">
                                 <div class="project-episode-name">${episode.episode_title}</div>
                                 <div class="project-episode-description">${episode.description}</div>

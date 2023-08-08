@@ -737,16 +737,19 @@ load().then(() => {
   
 
   let startY: number;
-let lastY: number;
-let scrollingDown: boolean = false;
-let isAtDefaultScroll: boolean = true; // Flag to track if scroll is at default position
-let gestureOccurred: boolean = false; // Flag to track if gesture occurred once
+  let lastY: number;
+  let scrollingDown: boolean = false;
+  let isAtDefaultScroll: boolean = true; // Flag to track if scroll is at default position
+  let gestureOccurred: boolean = false; // Flag to track if gesture occurred once
 
-// Store the default scroll position when the window is opened
-let defaultScrollY: number;
+  let shouldTrackGestures: boolean = false; // Flag to determine whether to track gestures
 
-// Reference to the project page element
-let projectPage: HTMLElement | null = null;
+  
+  // Store the default scroll position when the window is opened
+  let defaultScrollY: number;
+  
+  // Reference to the project page element
+  let projectPage: HTMLElement | null = null;
 
 
 // Window: Open function
@@ -805,6 +808,8 @@ async function openProjectWindow(event: Event) {
         }
         projectBackground.style.display = 'block';
         document.body.style.overflow = 'hidden';
+
+        shouldTrackGestures = true;
     }
 
   
@@ -812,6 +817,7 @@ async function openProjectWindow(event: Event) {
 // Window: Close
 function closeProjectWindow(projectBackground: HTMLElement) {
   gestureOccurred = false; // Reset the gestureOccurred flag
+  shouldTrackGestures = false; // Reset the shouldTrackGestures flag
   projectBackground.style.display = 'none';
   document.body.style.overflow = 'auto';
   document.removeEventListener('keydown', escKeyListener); // Remove the event listener
@@ -834,6 +840,7 @@ document.addEventListener('touchstart', (event: TouchEvent) => {
 
 // Handle touchmove event to determine scrolling direction
 document.addEventListener('touchmove', (event: TouchEvent) => {
+  if (!shouldTrackGestures) return; // Exit if not tracking gestures
   const currentY = event.touches[0].clientY;
   scrollingDown = currentY > lastY;
   lastY = currentY;
@@ -841,13 +848,8 @@ document.addEventListener('touchmove', (event: TouchEvent) => {
 
 // Handle touchend event to check if swipe-down gesture occurred
 document.addEventListener('touchend', () => {
-  if (!gestureOccurred && isAtDefaultScroll && scrollingDown) {
+  if (isAtDefaultScroll && scrollingDown && shouldTrackGestures) {
       gestureOccurred = true;
-      const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
-      closeProjectWindow(projectBackground);
-      return;
-  }
-  if (gestureOccurred && isAtDefaultScroll && scrollingDown) {
       const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
       closeProjectWindow(projectBackground);
   }

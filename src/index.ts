@@ -715,9 +715,14 @@ load().then(() => {
                       <div class="project-page-info-block-name">Director</div>
                       <div class="project-page-info-block-content">${projectData.project_data.director}</div>
                   </div>` : ''}
+              </div>
+          </div>
+
+          <div class="project-page-details">
+              <div class="project-page-section-content">
                   ${projectData.project_data.runtime ? `<div class="project-page-info-block">
                       <div class="project-page-info-block-name">Runtime</div>
-                      <div class="project-page-info-block-content">${projectData.project_data.runtime}</div>
+                      <div class="project-page-info-block-content">${projectData.project_data.runtime} minutes</div>
                   </div>` : ''}
               </div>
           </div>
@@ -730,18 +735,33 @@ load().then(() => {
       `;
   }
   
-  
-  
 
-    // Window: Open
-    async function openProjectWindow(event: Event) {
-        const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
-        const existingProjectPage = projectBackground.querySelector('.project-page') as HTMLElement;
-        const projectData = await getProjectData(event.target as HTMLElement);
+  let startY: number;
+let lastY: number;
+let scrollingDown: boolean = false;
+let isAtDefaultScroll: boolean = true; // Flag to track if scroll is at default position
+let gestureOccurred: boolean = false; // Flag to track if gesture occurred once
 
-        if (!projectData) {
-            return;
-        }
+// Store the default scroll position when the window is opened
+let defaultScrollY: number;
+
+// Reference to the project page element
+let projectPage: HTMLElement | null = null;
+
+
+// Window: Open function
+async function openProjectWindow(event: Event) {
+  const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
+  const existingProjectPage = projectBackground.querySelector('.project-page') as HTMLElement;
+  const projectData = await getProjectData(event.target as HTMLElement);
+
+  if (!projectData) {
+      return;
+  }
+
+  document.addEventListener('keydown', escKeyListener); // Add the event listener
+
+  defaultScrollY = projectPage?.scrollTop || 0;
 
         if (!existingProjectPage) {
             const projectPage = document.createElement('div');
@@ -757,6 +777,12 @@ load().then(() => {
             if (closeButton) {
                 closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
             }
+
+            const closeButtonX = document.querySelector('.project-page-close-button-x') as HTMLElement;
+            if (closeButtonX) {
+                closeButtonX.addEventListener('click', () => closeProjectWindow(projectBackground));
+            }
+
         } else {
             const projectPageWindow = createProjectPageWindow(projectData);
             existingProjectPage.setAttribute('name', projectData.name);
@@ -770,40 +796,81 @@ load().then(() => {
             if (closeButton) {
                 closeButton.addEventListener('click', () => closeProjectWindow(projectBackground));
             }
+
+            const closeButtonX = document.querySelector('.project-page-close-button-x') as HTMLElement;
+            if (closeButtonX) {
+                closeButtonX.addEventListener('click', () => closeProjectWindow(projectBackground));
+            }
+
         }
         projectBackground.style.display = 'block';
         document.body.style.overflow = 'hidden';
     }
 
-    // Window: Close
-    function closeProjectWindow(projectBackground: HTMLElement) {
-        projectBackground.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+  
+    
+// Window: Close
+function closeProjectWindow(projectBackground: HTMLElement) {
+  gestureOccurred = false; // Reset the gestureOccurred flag
+  projectBackground.style.display = 'none';
+  document.body.style.overflow = 'auto';
+  document.removeEventListener('keydown', escKeyListener); // Remove the event listener
+}
 
-    // Window: Close listener
-    document.addEventListener('click', (event: Event) => {
-        const target = event.target as HTMLElement;
-        if (
-            target.classList.contains('project-page-background') ||
-            target.classList.contains('project-page-close-button') ||
-            target.classList.contains('material-symbols-outlined')
-        ) {
-          const projectPage = document.querySelector('.project-page-animation') as HTMLElement;
-          if (projectPage) {
-              projectPage.classList.remove('project-page-animation');
-          }
+// Function to handle Esc key press
+function escKeyListener(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+      const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
+      closeProjectWindow(projectBackground);
+  }
+}
 
-            closeProjectWindow(document.querySelector('.project-page-background') as HTMLElement);
-        }
-    });
+// Handle touchstart event to store the starting Y coordinate
+document.addEventListener('touchstart', (event: TouchEvent) => {
+  startY = event.touches[0].clientY;
+  lastY = startY;
+  scrollingDown = false;
+});
 
-    // Window: Open listener
-    const projectDivs = document.querySelectorAll('.project');
-    projectDivs.forEach((projectDiv) => {
-        projectDiv.addEventListener('click', openProjectWindow);
-    });
+// Handle touchmove event to determine scrolling direction
+document.addEventListener('touchmove', (event: TouchEvent) => {
+  const currentY = event.touches[0].clientY;
+  scrollingDown = currentY > lastY;
+  lastY = currentY;
+});
 
+// Handle touchend event to check if swipe-down gesture occurred
+document.addEventListener('touchend', () => {
+  if (!gestureOccurred && isAtDefaultScroll && scrollingDown) {
+      gestureOccurred = true;
+      const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
+      closeProjectWindow(projectBackground);
+      return;
+  }
+  if (gestureOccurred && isAtDefaultScroll && scrollingDown) {
+      const projectBackground = document.querySelector('.project-page-background') as HTMLElement;
+      closeProjectWindow(projectBackground);
+  }
+});
+
+// Get default scroll position in window
+// Handle window scroll event to track if scroll is at default position
+window.addEventListener('scroll', () => {
+  if (projectPage) {
+      isAtDefaultScroll = projectPage.scrollTop === defaultScrollY;
+  }
+});
+
+// Window: Open listener
+const projectDivs = document.querySelectorAll('.project');
+projectDivs.forEach((projectDiv) => {
+  projectDiv.addEventListener('click', (event: Event) => {
+      openProjectWindow(event);
+      projectPage = projectDiv.querySelector('.project-page') as HTMLElement;
+      gestureOccurred = false; // Reset the gestureOccurred flag
+  });
+});
+    
 
 
   // Widget: Next

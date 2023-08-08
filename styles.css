@@ -973,6 +973,8 @@ input[type="checkbox"]:disabled {
 
 
 .project-page-animation {
+    animation-duration: 0.3s;
+    animation-fill-mode: forwards;
     animation: fadeInUp 0.3s ease-in-out forwards;
 }
 
